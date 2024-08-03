@@ -1,0 +1,6 @@
+[project]
+name = "thy-name"
+dependencies = [
+  "ruff",
+  "python-fasthtml",
+]
