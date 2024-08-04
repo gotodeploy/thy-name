@@ -36,7 +36,7 @@ def draw_card(number):
         Div(
             H2(
                 kanji[number],
-                style='color: black; font-family: "Noto Serif TC", serif;"',
+                style='color: black; font-variant-east-asian: traditional; font-family: "Noto Serif TC", serif;"',
             ),
             P("🇹🇼"),
             cls="card",
@@ -45,7 +45,7 @@ def draw_card(number):
         Div(
             H2(
                 kanji[number],
-                style='color: black; font-family: "Noto Serif JP", serif;"',
+                style='color: black; font-variant-east-asian: jis04; font-family: "Noto Serif JP", serif;"',
             ),
             P("🇯🇵"),
             cls="card",
@@ -57,7 +57,7 @@ def draw_card(number):
 
 @app.get("/")
 def home():
-    initial_cards = [draw_card(i) for i in range(1, 21)]
+    initial_cards = [draw_card(i) for i in range(0, 21)]
     return Title("台灣日本命名可用漢字"), Main(
         H1("台灣日本命名可用漢字"),
         Div(*initial_cards, id="card-container"),
@@ -73,7 +73,7 @@ def home():
 
 @app.get("/more-cards")
 def more_cards(request):
-    start = int(request.query_params.get("start", 21))
+    start = int(request.query_params.get("start", 20))
     end = start + 20
 
     new_cards = [draw_card(i) for i in range(start, min(len(kanji), end))]
