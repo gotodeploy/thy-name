@@ -12,7 +12,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
-from src.migrations.seed_loader import insert_kanji
+from migrations.seed_loader import insert_kanji
 
 # revision identifiers, used by Alembic.
 revision: str = "dc2325b33b3f"

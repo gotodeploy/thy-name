@@ -13,4 +13,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=from=uv,source=/uv,target=./uv \
     ./uv pip install  -r requirements.txt
 
-ENTRYPOINT [ "python", "./src/main.py" ]
+ENTRYPOINT [ "python", "./main.py" ]

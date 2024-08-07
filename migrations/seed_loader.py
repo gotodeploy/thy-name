@@ -3,7 +3,7 @@ from pathlib import Path
 
 from sqlalchemy import insert
 
-from src.models import Kanji
+from models import Kanji
 
 
 def load_csv(file_path: Path):

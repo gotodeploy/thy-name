@@ -5,11 +5,11 @@ from fasthtml import FastHTML, picolink, Link
 from fasthtml.common import Div, H1, H2, Main, P, Title, serve
 from sqlalchemy import create_engine, select
 
-from src.models import Kanji
+from models import Kanji
 
 kanji = []
 
-engine = create_engine(os.environ["POSTGRES_URL"])
+engine = create_engine(os.environ["POSTGRES_URL"].replace("postgres://", "postgresql://"))
 with engine.connect() as connection:
     for record in connection.execute(select(Kanji.character)).all():
         kanji.append(record.character)

@@ -16,6 +16,6 @@ services:
     volumes:
       - .:/app/
     entrypoint: [ "bash", "-c" ]
-    command: [ "alembic upgrade head && uvicorn src.main:app --host=0.0.0.0 --reload" ]
+    command: [ "alembic upgrade head && uvicorn main:app --host=0.0.0.0 --reload" ]
     depends_on:
       - postgres
