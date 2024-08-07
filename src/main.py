@@ -1,8 +1,19 @@
-import csv
+import os
 import random
 
 from fasthtml import FastHTML, picolink, Link
-from fasthtml.common import Div, H1, H2, Main, P, Path, Title, serve
+from fasthtml.common import Div, H1, H2, Main, P, Title, serve
+from sqlalchemy import create_engine, select
+
+from src.models import Kanji
+
+kanji = []
+
+engine = create_engine(os.environ["POSTGRES_URL"])
+with engine.connect() as connection:
+    for record in connection.execute(select(Kanji.character)).all():
+        kanji.append(record.character)
+
 
 app = FastHTML(
     hdrs=(
@@ -15,19 +26,6 @@ app = FastHTML(
         ),
     )
 )
-
-
-def load_csv(file_path: Path):
-    with open(file_path, newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            yield row
-
-
-kanji = []
-for row in load_csv(Path("data/common.csv")):
-    for k, v in row.items():
-        kanji.append(v)
 
 
 def draw_card(number):
@@ -85,6 +83,5 @@ def more_cards(request):
             hx_swap="afterend",
             hx_target="this",
         )
-
 
 serve()

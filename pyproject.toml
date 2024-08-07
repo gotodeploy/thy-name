@@ -1,6 +1,10 @@
 [project]
 name = "thy-name"
 dependencies = [
-  "ruff",
+  "alembic",
+  "psycopg2-binary",
+  "pydantic",
   "python-fasthtml",
+  "ruff",
+  "sqlalchemy",
 ]

@@ -11,3 +11,17 @@
   - `ucs-strokes.txt`
 - [Noto Sans Traditional Chinese](https://fonts.google.com/noto/specimen/Noto+Sans+TC) - 繁體字字型
   - `NotoSerifTC-Regular.ttf`
+
+## Commands
+
+- Create new revision
+
+```shell
+docker compose exec app alembic revision --autogenerate -m "comment"
+```
+
+- Run migration online
+
+```shell
+POSTGRES_URL=postgresql:// alembic upgrade head
+```
