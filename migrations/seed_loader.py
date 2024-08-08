@@ -13,6 +13,6 @@ def load_csv(file_path: Path):
             yield row
 
 
-def insert_kanji(session, file_path="./src/migrations/seeds/kanji_glyph.csv"):
+def insert_kanji(session, file_path="./migrations/seeds/kanji.csv"):
     characters = list(load_csv(Path(file_path)))
     session.execute(insert(Kanji), characters)

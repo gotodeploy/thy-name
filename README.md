@@ -25,3 +25,9 @@ docker compose exec app alembic revision --autogenerate -m "comment"
 ```shell
 POSTGRES_URL=postgresql:// alembic upgrade head
 ```
+
+- Generate offset font
+
+```shell
+docker compose exec app pyftsubset public/fonts/NotoSerifTC-Regular.ttf --no-hinting --flavor=woff2 --text-file=migrations/seeds/kanji.csv
+```

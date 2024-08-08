@@ -11,6 +11,8 @@ anyio==4.4.0
     #   watchfiles
 beautifulsoup4==4.12.3
     # via python-fasthtml
+brotli==1.1.0
+    # via fonttools
 certifi==2024.7.4
     # via
     #   httpcore
@@ -26,6 +28,8 @@ fastcore==1.6.1
     #   sqlite-minutils
 fastlite==0.0.7
     # via python-fasthtml
+fonttools==4.53.1
+    # via thy-name (pyproject.toml)
 greenlet==3.0.3
     # via sqlalchemy
 h11==0.14.0
@@ -102,3 +106,5 @@ watchfiles==0.22.0
     # via uvicorn
 websockets==12.0
     # via uvicorn
+zopfli==0.2.3
+    # via fonttools

@@ -1,80 +1,142 @@
 import os
-import random
 
-from fasthtml import FastHTML, picolink, Link
-from fasthtml.common import Div, H1, H2, Main, P, Title, serve
-from sqlalchemy import create_engine, select
+from fasthtml import (
+    FastHTML,
+    Link,
+    Button,
+    Table,
+    Thead,
+    Tr,
+    Th,
+    Td,
+    Tbody,
+)
+from fasthtml.common import Div, H1, Main, Title, serve
+from sqlalchemy import create_engine, select, update
+from starlette.responses import FileResponse
 
 from models import Kanji
 
-kanji = []
-
-engine = create_engine(os.environ["POSTGRES_URL"].replace("postgres://", "postgresql://"))
-with engine.connect() as connection:
-    for record in connection.execute(select(Kanji.character)).all():
-        kanji.append(record.character)
-
+engine = create_engine(
+    os.environ["POSTGRES_URL"].replace("postgres://", "postgresql://")
+)
 
 app = FastHTML(
     hdrs=(
-        picolink,
-        Link(rel="preconnect", href="https://fonts.googleapis.com"),
-        Link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=True),
-        Link(
-            rel="stylesheet",
-            href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200..900&family=Noto+Serif+TC:wght@200..900&display=swap",
-        ),
+        Link(rel="stylesheet", href="assets/style.css"),
+        Link(rel="stylesheet", href="fonts/NotoSerifTC-Regular.subset.woff2"),
+        Link(rel="stylesheet", href="fonts/NotoSerifJP-Regular.subset.woff2"),
     )
 )
+rt = app.route
 
 
-def draw_card(number):
-    color = f"hsl({random.randint(0, 360)}, 70%, 80%)"
-    return Div(
-        Div(
-            H2(
-                kanji[number],
-                style='color: black; font-variant-east-asian: traditional; font-family: "Noto Serif TC", serif;"',
-            ),
-            P("🇹🇼"),
-            cls="card",
-            style=f"background-color: {color}; margin: 10px; padding: 20px; border-radius: 8px;",
-        ),
-        Div(
-            H2(
-                kanji[number],
-                style='color: black; font-variant-east-asian: jis04; font-family: "Noto Serif JP", serif;"',
-            ),
-            P("🇯🇵"),
-            cls="card",
-            style=f"background-color: {color}; margin: 10px; padding: 20px; border-radius: 8px;",
-        ),
-        style="display:flex",
+@rt("/{fname:path}.{ext:static}")
+async def get(fname: str, ext: str):
+    return FileResponse(f"public/{fname}.{ext}")
+
+
+def rating(id, rating):
+    return Td(
+        f"{rating}讚",
+        id=f"kanji_{id}",
     )
 
 
-@app.get("/")
-def home():
-    initial_cards = [draw_card(i) for i in range(0, 21)]
+@rt("/kanji/downvote/{id}")
+def post(id: int):
+    with engine.connect() as connection:
+        query = select(Kanji).where(Kanji.id == id)
+        kanji = connection.execute(query).one()
+        query = update(Kanji).values(rating=kanji.rating - 1).where(Kanji.id == id)
+        connection.execute(query)
+        connection.commit()
+
+    return rating(id, kanji.rating - 1)
+
+
+@rt("/kanji/upvote/{id}")
+def post(id: int):
+    with engine.connect() as connection:
+        query = select(Kanji).where(Kanji.id == id)
+        kanji = connection.execute(query).one()
+        query = update(Kanji).values(rating=kanji.rating + 1).where(Kanji.id == id)
+        connection.execute(query)
+        connection.commit()
+
+    return rating(id, kanji.rating + 1)
+
+
+def draw_card(start, end):
+    with engine.connect() as connection:
+        query = select(Kanji).offset(start).limit(end).order_by(Kanji.rating.desc())
+        for kanji in connection.execute(query).all():
+            yield Tr(
+                Td(
+                    f"🇹🇼{kanji.character}",
+                    cls="py-2 px-4 border-b, font-taiwan",
+                ),
+                Td(
+                    f"🇯🇵{kanji.character}",
+                    cls="py-2 px-4 border-b, font-nihon",
+                ),
+                rating(kanji.id, kanji.rating),
+                Td(
+                    Button(
+                        "👍",
+                        cls="bg-green-500 text-white px-2 py-1 rounded",
+                        hx_post=f"/kanji/upvote/{kanji.id}",
+                        hx_target=f"#kanji_{kanji.id}",
+                        hx_swap="outerHTML",
+                    ),
+                    Button(
+                        "👎",
+                        cls="bg-red-500 text-white px-2 py-1 rounded",
+                        hx_post=f"/kanji/downvote/{kanji.id}",
+                        hx_target=f"#kanji_{kanji.id}",
+                        hx_swap="outerHTML",
+                    ),
+                    cls="py-2 px-4 border-b",
+                ),
+            )
+
+
+@rt("/")
+def get():
+    initial_cards = draw_card(0, 21)
     return Title("台灣日本命名可用漢字"), Main(
-        H1("台灣日本命名可用漢字"),
-        Div(*initial_cards, id="card-container"),
-        Div(
-            hx_get="/more-cards",
-            hx_trigger="intersect once",
-            hx_swap="afterend",
-            hx_target="#card-container",
+        H1("台灣日本命名可用漢字", cls="text-3xl mb-6"),
+        Table(
+            Thead(
+                Tr(
+                    Th("🇹🇼", cls="py-2 px-4 border-b"),
+                    Th("🇯🇵", cls="py-2 px-4 border-b"),
+                    Th("讚", cls="py-2 px-4 border-b"),
+                    Th("", cls="py-2 px-4 border-b"),
+                )
+            ),
+            Tbody(
+                *initial_cards,
+                Div(
+                    hx_get="/more-cards",
+                    hx_trigger="intersect once",
+                    hx_swap="afterend",
+                    hx_target="#container",
+                ),
+                id="container",
+            ),
+            cls="min-w-full bg-white border border-gray-200",
         ),
-        style="max-width: 800px; margin: 0 auto;",
+        cls="bg-gray-100 p-6 mx-auto",
     )
 
 
-@app.get("/more-cards")
-def more_cards(request):
-    start = int(request.query_params.get("start", 20))
+@rt("/more-cards")
+def get(request):
+    start = int(request.query_params.get("start", 21))
     end = start + 20
 
-    new_cards = [draw_card(i) for i in range(start, min(len(kanji), end))]
+    new_cards = draw_card(start, end)
 
     if new_cards:
         return *new_cards, Div(
@@ -83,5 +145,6 @@ def more_cards(request):
             hx_swap="afterend",
             hx_target="this",
         )
+
 
 serve()
