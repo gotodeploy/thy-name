@@ -21,7 +21,7 @@ click==8.1.7
     # via uvicorn
 exceptiongroup==1.2.2
     # via anyio
-fastcore==1.6.1
+fastcore==1.6.5
     # via
     #   fastlite
     #   python-fasthtml
@@ -66,13 +66,13 @@ python-dateutil==2.9.0.post0
     # via python-fasthtml
 python-dotenv==1.0.1
     # via uvicorn
-python-fasthtml==0.2.1
+python-fasthtml==0.3.1
     # via thy-name (pyproject.toml)
 python-multipart==0.0.9
     # via python-fasthtml
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via uvicorn
-ruff==0.5.5
+ruff==0.5.7
     # via thy-name (pyproject.toml)
 six==1.16.0
     # via python-dateutil
@@ -102,7 +102,7 @@ uvicorn==0.30.5
     # via python-fasthtml
 uvloop==0.19.0
     # via uvicorn
-watchfiles==0.22.0
+watchfiles==0.23.0
     # via uvicorn
 websockets==12.0
     # via uvicorn
