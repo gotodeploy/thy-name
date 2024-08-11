@@ -187,7 +187,7 @@ def draw_kanji(offset, kanji_count):
             select(Kanji)
             .offset(offset)
             .fetch(kanji_count)
-            .order_by(Kanji.rating.desc())
+            .order_by(Kanji.rating.desc(), Kanji.id.asc())
         )
         for kanji in connection.execute(query).all():
             kanji_tag = f"kanji_{kanji.id}"
@@ -267,30 +267,15 @@ def draw_name(offset, name_count):
         )
         items = []
         for name in connection.execute(query).all():
+            name_tag = f"#name_{name.id}"
             items.append(
                 Tr(
                     Td(
                         f"{name.name}",
                         cls="py-2 px-4 border-b font-taiwan",
                     ),
-                    rating_tag(f"name_{name.id}", name.rating),
-                    Td(
-                        Button(
-                            "👍",
-                            cls="bg-green-500 text-white px-2 py-1 rounded",
-                            hx_post=f"/name/upvote/{name.id}",
-                            hx_target=f"#name_{name.id}",
-                            hx_swap="outerHTML",
-                        ),
-                        Button(
-                            "👎",
-                            cls="bg-red-500 text-white px-2 py-1 rounded",
-                            hx_post=f"/name/downvote/{name.id}",
-                            hx_target=f"#name_{name.id}",
-                            hx_swap="outerHTML",
-                        ),
-                        cls="py-2 px-4 border-b",
-                    ),
+                    rating_tag(name_tag, name.rating),
+                    vote_buttons("name", name.id, name_tag),
                 )
             )
         return items
