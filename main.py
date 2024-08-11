@@ -148,14 +148,14 @@ def header_tab(activate):
     cls_inactive = "bg-gray-300 text-gray-700 px-4 py-2 rounded"
     tab_attributes = {
         "漢字評分": {"hx_get": "/kanji-board", "cls": cls_inactive},
-        "姓名評分": {"hx_get": "/name-board", "cls": cls_inactive},
+        "名字評分": {"hx_get": "/name-board", "cls": cls_inactive},
     }
     match activate:
         case "kanji":
             tab_attributes["漢字評分"]["cls"] = cls_active
             active_tab = "/kanji-board"
         case "name":
-            tab_attributes["姓名評分"]["cls"] = cls_active
+            tab_attributes["名字評分"]["cls"] = cls_active
             active_tab = "/name-board"
         case _:
             tab_attributes["漢字評分"]["cls"] = cls_active
@@ -311,7 +311,7 @@ async def put(session, request):
     if not input_name:
         return
     if validate_name(input_name):
-        add_toast(session, f"{input_name} is invalid", "error")
+        add_toast(session, f'"{input_name}" 輸入有誤', "error")
         return
     with engine.connect() as connection:
         query = insert(ThyName).values(name=input_name)
@@ -354,7 +354,7 @@ def name_board():
                 Input(
                     type="text",
                     name="name",
-                    placeholder="姓名",
+                    placeholder="名字",
                     cls="border border-gray-300 p-2 rounded-lg w-full",
                 ),
                 Button(
