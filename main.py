@@ -119,6 +119,7 @@ def vote_buttons(model, id, tag):
         cls="py-2 px-4 border-b",
     )
 
+
 @rt("/kanji/downvote/{kanji_id}")
 def post(kanji_id: int):
     new_rating = vote_rating(Kanji, kanji_id, -1)
@@ -267,7 +268,7 @@ def draw_name(offset, name_count):
         )
         items = []
         for name in connection.execute(query).all():
-            name_tag = f"#name_{name.id}"
+            name_tag = f"name_{name.id}"
             items.append(
                 Tr(
                     Td(
@@ -275,7 +276,7 @@ def draw_name(offset, name_count):
                         cls="py-2 px-4 border-b font-taiwan",
                     ),
                     rating_tag(name_tag, name.rating),
-                    vote_buttons("name", name.id, name_tag),
+                    vote_buttons("name", name.id, f"#{name_tag}"),
                 )
             )
         return items
@@ -284,7 +285,11 @@ def draw_name(offset, name_count):
 def validate_name(name):
     normalized_name = set(name)
     with engine.connect() as connection:
-        query = select(func.count("id")).select_from(Kanji).where(Kanji.character.in_(normalized_name))
+        query = (
+            select(func.count("id"))
+            .select_from(Kanji)
+            .where(Kanji.character.in_(normalized_name))
+        )
         kanji_count = connection.execute(query).scalar()
         return kanji_count != len(normalized_name)
 
