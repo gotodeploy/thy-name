@@ -188,11 +188,14 @@ def draw_kanji(offset, kanji_count):
             select(Kanji)
             .offset(offset)
             .fetch(kanji_count)
+            .where(Kanji.rating > -10)
             .order_by(Kanji.rating.desc(), Kanji.id.asc())
         )
+        new_kanji = []
         for kanji in connection.execute(query).all():
             kanji_tag = f"kanji_{kanji.id}"
-            yield Tr(
+            new_kanji.append(
+                Tr(
                 Td(
                     f"🇹🇼{kanji.character}",
                     cls="py-2 px-4 border-b font-taiwan",
@@ -203,7 +206,9 @@ def draw_kanji(offset, kanji_count):
                 ),
                 rating_tag(kanji_tag, kanji.rating),
                 vote_buttons("kanji", kanji.id, f"#{kanji_tag}"),
+                )
             )
+        return new_kanji
 
 
 def kanji_board():
@@ -266,10 +271,10 @@ def draw_name(offset, name_count):
             .fetch(name_count)
             .order_by(ThyName.rating.desc(), ThyName.id.desc())
         )
-        items = []
+        new_names = []
         for name in connection.execute(query).all():
             name_tag = f"name_{name.id}"
-            items.append(
+            new_names.append(
                 Tr(
                     Td(
                         f"{name.name}",
@@ -279,7 +284,7 @@ def draw_name(offset, name_count):
                     vote_buttons("name", name.id, f"#{name_tag}"),
                 )
             )
-        return items
+        return new_names
 
 
 def validate_name(name):
@@ -324,7 +329,6 @@ async def put(session, request):
 @rt("/more-name")
 def get(request):
     offset = int(request.query_params.get("start", CHUNK_SIZE))
-
     new_cards = draw_name(offset, CHUNK_SIZE)
 
     if new_cards:
